@@ -3,25 +3,25 @@ import { motion } from 'framer-motion'
 
 // Kassiopeia Sternbild (W-Form, nach links gedreht = M-Form)
 // Ziel-Positionen für die 5 Sterne in M-Form (nach links gedrehtes W)
-// Positionen in Prozent - mit Sicherheitsabstand zu den Rändern (15-85% horizontal, 25-70% vertikal)
+// Positionen in Prozent - sicher innerhalb des Containers (25-75% horizontal, 35-65% vertikal)
 const TARGET_POSITIONS = [
-  { x: 20, y: 60 },    // Links unten
-  { x: 32.5, y: 30 },  // Links oben
+  { x: 25, y: 55 },    // Links unten
+  { x: 37.5, y: 35 },  // Links oben
   { x: 50, y: 45 },    // Mitte
-  { x: 67.5, y: 30 },  // Rechts oben
-  { x: 80, y: 60 },    // Rechts unten
+  { x: 62.5, y: 35 },  // Rechts oben
+  { x: 75, y: 55 },    // Rechts unten
 ]
 
-const TOLERANCE = 12 // Prozent-Toleranz für "richtige" Position (erhöht für mobile Geräte)
+const TOLERANCE = 15 // Prozent-Toleranz für "richtige" Position (großzügig für mobile Geräte)
 
 function StarField({ onUnlock }) {
-  // Start-Positionen in Prozent - innerhalb des Kastens (15-85% horizontal, 20-75% vertikal)
+  // Start-Positionen in Prozent - gut verteilt innerhalb des Kastens
   const [stars, setStars] = useState([
-    { id: 1, x: 25, y: 25 },   // Links oben
-    { id: 2, x: 75, y: 35 },   // Rechts oben
-    { id: 3, x: 35, y: 70 },   // Links unten
-    { id: 4, x: 65, y: 65 },   // Rechts unten
-    { id: 5, x: 50, y: 70 },   // Mitte unten
+    { id: 1, x: 30, y: 40 },   // Links mitte
+    { id: 2, x: 70, y: 40 },   // Rechts mitte
+    { id: 3, x: 40, y: 60 },   // Links unten
+    { id: 4, x: 60, y: 60 },   // Rechts unten
+    { id: 5, x: 50, y: 50 },   // Zentrum
   ])
 
   const containerRef = useRef(null)
@@ -35,11 +35,11 @@ function StarField({ onUnlock }) {
 
     const newStars = stars.map(star => {
       if (star.id === id) {
-        // Begrenze auf 10-90% um Sterne innerhalb des Kastens zu halten
+        // Begrenze auf 15-85% um Sterne sicher innerhalb des Kastens zu halten
         return {
           ...star,
-          x: Math.max(10, Math.min(90, star.x + deltaXPercent)),
-          y: Math.max(10, Math.min(90, star.y + deltaYPercent)),
+          x: Math.max(15, Math.min(85, star.x + deltaXPercent)),
+          y: Math.max(15, Math.min(85, star.y + deltaYPercent)),
         }
       }
       return star
