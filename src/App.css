@@ -132,15 +132,17 @@ body {
   touch-action: none;
 }
 
-/* Ziel-Hinweise für das Sternbild */
-.target-hint {
+/* Ziel-Sterne für das Sternbild (subtil, wie Hintergrund-Sterne) */
+.target-star {
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: 3px;
+  height: 3px;
   border-radius: 50%;
-  background: rgba(255, 216, 155, 0.15);
+  background: var(--star-bright);
   transform: translate(-50%, -50%);
   pointer-events: none;
+  opacity: 0.25;
+  box-shadow: 0 0 4px rgba(255, 245, 225, 0.3);
 }
 
 /* Draggable Sterne - KLEINER */

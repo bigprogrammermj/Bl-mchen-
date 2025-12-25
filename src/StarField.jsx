@@ -145,10 +145,11 @@ function StarField({ onUnlock }) {
       </h1>
 
       <div className="constellation-area" ref={containerRef}>
+        {/* Ziel-Sterne (subtil, nicht flackernd) */}
         {initialized && TARGET_POSITIONS.map((pos, i) => (
           <div
             key={`target-${i}`}
-            className="target-hint"
+            className="target-star"
             style={{
               left: `${pos.x * 100}%`,
               top: `${pos.y * 100}%`,
