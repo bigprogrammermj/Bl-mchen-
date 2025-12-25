@@ -30,24 +30,62 @@ function StarField({ onUnlock }) {
     if (!containerRef.current) return
 
     const containerRect = containerRef.current.getBoundingClientRect()
-    const deltaXPercent = (info.delta.x / containerRect.width) * 100
-    const deltaYPercent = (info.delta.y / containerRect.height) * 100
+
+    // Berechne absolute Position des Sterns basierend auf dem Drag-Event
+    const clientX = event.clientX || (event.touches && event.touches[0]?.clientX)
+    const clientY = event.clientY || (event.touches && event.touches[0]?.clientY)
+
+    if (!clientX || !clientY) return
+
+    // Berechne Position relativ zum Container in Prozent
+    const xPercent = ((clientX - containerRect.left) / containerRect.width) * 100
+    const yPercent = ((clientY - containerRect.top) / containerRect.height) * 100
 
     const newStars = stars.map(star => {
       if (star.id === id) {
         // Begrenze auf 15-85% um Sterne sicher innerhalb des Kastens zu halten
         return {
           ...star,
-          x: Math.max(15, Math.min(85, star.x + deltaXPercent)),
-          y: Math.max(15, Math.min(85, star.y + deltaYPercent)),
+          x: Math.max(15, Math.min(85, xPercent)),
+          y: Math.max(15, Math.min(85, yPercent)),
         }
       }
       return star
     })
     setStars(newStars)
+  }
 
-    // Prüfe ob alle Sterne in der richtigen Kassiopeia-Formation sind
-    checkConstellation(newStars)
+  const handleDragEnd = (id) => {
+    // Prüfe ob der Stern nahe genug an einer Zielposition ist
+    const star = stars.find(s => s.id === id)
+    if (!star) return
+
+    let closestTarget = null
+    let minDistance = Infinity
+
+    TARGET_POSITIONS.forEach((target) => {
+      const distance = Math.sqrt(
+        Math.pow(star.x - target.x, 2) + Math.pow(star.y - target.y, 2)
+      )
+      if (distance < minDistance && distance < TOLERANCE) {
+        minDistance = distance
+        closestTarget = target
+      }
+    })
+
+    // Wenn nahe genug, raste ein
+    if (closestTarget) {
+      const newStars = stars.map(s => {
+        if (s.id === id) {
+          return { ...s, x: closestTarget.x, y: closestTarget.y }
+        }
+        return s
+      })
+      setStars(newStars)
+      checkConstellation(newStars)
+    } else {
+      checkConstellation(stars)
+    }
   }
 
   const checkConstellation = (currentStars) => {
@@ -92,9 +130,6 @@ function StarField({ onUnlock }) {
       <h1 className="star-field-title">
         Für die Liebe meines Lebens
       </h1>
-      <p className="star-field-instruction">
-        Ordne die Sterne zu unserem Sternbild ✨
-      </p>
 
       <div className="constellation-area" ref={containerRef}>
         {/* Ziel-Positionen als Hinweise (optional dezent) */}
@@ -124,6 +159,7 @@ function StarField({ onUnlock }) {
             drag
             dragMomentum={false}
             onDrag={(e, info) => handleDrag(star.id, e, info)}
+            onDragEnd={() => handleDragEnd(star.id)}
             style={{
               left: `${star.x}%`,
               top: `${star.y}%`,
@@ -132,6 +168,12 @@ function StarField({ onUnlock }) {
             }}
             whileHover={{ scale: 1.2 }}
             whileTap={{ scale: 0.9 }}
+            animate={{
+              x: 0,
+              y: 0,
+              rotate: 180
+            }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
             <svg viewBox="0 0 51 48" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
