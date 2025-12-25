@@ -119,7 +119,7 @@ function GiftReveal() {
                     loop
                     muted
                     playsInline
-                    src="/video.mp4"
+                    src="/video.mov"
                   />
                 </div>
               </motion.div>
