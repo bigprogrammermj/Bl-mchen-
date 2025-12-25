@@ -3,25 +3,25 @@ import { motion } from 'framer-motion'
 
 // Kassiopeia Sternbild (W-Form, nach links gedreht = M-Form)
 // Ziel-Positionen für die 5 Sterne in M-Form (nach links gedrehtes W)
-// Positionen in Prozent (basierend auf 800x600 Design)
+// Positionen in Prozent - mit Sicherheitsabstand zu den Rändern (15-85% horizontal, 25-70% vertikal)
 const TARGET_POSITIONS = [
-  { x: 18.75, y: 50 },    // Links unten (150/800, 300/600)
-  { x: 31.25, y: 25 },    // Links oben (250/800, 150/600)
-  { x: 43.75, y: 41.67 }, // Mitte (350/800, 250/600)
-  { x: 56.25, y: 25 },    // Rechts oben (450/800, 150/600)
-  { x: 68.75, y: 50 },    // Rechts unten (550/800, 300/600)
+  { x: 20, y: 60 },    // Links unten
+  { x: 32.5, y: 30 },  // Links oben
+  { x: 50, y: 45 },    // Mitte
+  { x: 67.5, y: 30 },  // Rechts oben
+  { x: 80, y: 60 },    // Rechts unten
 ]
 
-const TOLERANCE = 8 // Prozent-Toleranz für "richtige" Position
+const TOLERANCE = 12 // Prozent-Toleranz für "richtige" Position (erhöht für mobile Geräte)
 
 function StarField({ onUnlock }) {
-  // Start-Positionen in Prozent (basierend auf 800x600 Design)
+  // Start-Positionen in Prozent - innerhalb des Kastens (15-85% horizontal, 20-75% vertikal)
   const [stars, setStars] = useState([
-    { id: 1, x: 12.5, y: 16.67 },   // 100/800, 100/600
-    { id: 2, x: 75, y: 25 },        // 600/800, 150/600
-    { id: 3, x: 25, y: 75 },        // 200/800, 450/600
-    { id: 4, x: 62.5, y: 66.67 },   // 500/800, 400/600
-    { id: 5, x: 43.75, y: 83.33 },  // 350/800, 500/600
+    { id: 1, x: 25, y: 25 },   // Links oben
+    { id: 2, x: 75, y: 35 },   // Rechts oben
+    { id: 3, x: 35, y: 70 },   // Links unten
+    { id: 4, x: 65, y: 65 },   // Rechts unten
+    { id: 5, x: 50, y: 70 },   // Mitte unten
   ])
 
   const containerRef = useRef(null)
@@ -35,10 +35,11 @@ function StarField({ onUnlock }) {
 
     const newStars = stars.map(star => {
       if (star.id === id) {
+        // Begrenze auf 10-90% um Sterne innerhalb des Kastens zu halten
         return {
           ...star,
-          x: Math.max(0, Math.min(100, star.x + deltaXPercent)),
-          y: Math.max(0, Math.min(100, star.y + deltaYPercent)),
+          x: Math.max(10, Math.min(90, star.x + deltaXPercent)),
+          y: Math.max(10, Math.min(90, star.y + deltaYPercent)),
         }
       }
       return star
@@ -54,6 +55,7 @@ function StarField({ onUnlock }) {
     const sortedStars = [...currentStars].sort((a, b) => a.x - b.x)
 
     let correctCount = 0
+    const distances = []
 
     sortedStars.forEach((star, index) => {
       const target = TARGET_POSITIONS[index]
@@ -62,13 +64,19 @@ function StarField({ onUnlock }) {
         Math.pow(star.x - target.x, 2) + Math.pow(star.y - target.y, 2)
       )
 
+      distances.push({ id: star.id, distance: distance.toFixed(2), correct: distance < TOLERANCE })
+
       if (distance < TOLERANCE) {
         correctCount++
       }
     })
 
+    // Debug: Zeige Fortschritt in der Konsole
+    console.log(`Korrekte Sterne: ${correctCount}/5`, distances)
+
     // Wenn alle 5 Sterne korrekt positioniert sind
     if (correctCount === 5) {
+      console.log('🎉 Konstellation komplett! Entsperre Geschenk...')
       onUnlock()
     }
   }
@@ -97,11 +105,13 @@ function StarField({ onUnlock }) {
               position: 'absolute',
               left: `${pos.x}%`,
               top: `${pos.y}%`,
-              width: '6px',
-              height: '6px',
+              width: '10px',
+              height: '10px',
               borderRadius: '50%',
-              background: 'rgba(255, 216, 155, 0.2)',
+              background: 'rgba(255, 216, 155, 0.3)',
+              boxShadow: '0 0 10px rgba(255, 216, 155, 0.4)',
               transform: 'translate(-50%, -50%)',
+              pointerEvents: 'none',
             }}
           />
         ))}
