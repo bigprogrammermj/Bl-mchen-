@@ -20,19 +20,27 @@ body {
   font-family: 'Crimson Pro', serif;
   background: var(--night-deep);
   color: var(--star-bright);
-  overflow-x: hidden;
+  overflow: hidden;
   min-height: 100vh;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  -webkit-overflow-scrolling: none;
 }
 
 #root {
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
+  position: fixed;
 }
 
 .app {
-  position: relative;
+  position: fixed;
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
   background:
     radial-gradient(ellipse at top, var(--night-mid) 0%, transparent 60%),
     radial-gradient(ellipse at bottom right, #1a0a2e 0%, transparent 50%),
@@ -68,15 +76,16 @@ body {
 
 /* Star Field Container */
 .star-field {
-  position: relative;
+  position: fixed;
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 1rem;
   z-index: 1;
+  overflow: hidden;
 }
 
 .star-field-title {
@@ -112,7 +121,7 @@ body {
 .constellation-area {
   position: relative;
   width: min(800px, 90vw);
-  height: min(600px, 70vh);
+  height: min(600px, 60vh);
   border: 1px solid rgba(255, 216, 155, 0.2);
   border-radius: 20px;
   background: rgba(10, 14, 39, 0.3);
@@ -120,6 +129,8 @@ body {
   box-shadow:
     0 0 40px rgba(255, 216, 155, 0.1),
     inset 0 0 60px rgba(255, 216, 155, 0.05);
+  overflow: hidden;
+  touch-action: none;
 }
 
 .draggable-star {
@@ -128,6 +139,7 @@ body {
   z-index: 10;
   filter: drop-shadow(0 0 8px var(--star-gold));
   transition: filter 0.3s ease;
+  touch-action: none;
 }
 
 .draggable-star:hover {
@@ -152,15 +164,18 @@ body {
 
 /* Gift Reveal */
 .gift-reveal {
-  position: relative;
+  position: fixed;
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 4rem 2rem;
+  padding: 2rem 1rem;
   z-index: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .gift-container {

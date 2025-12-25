@@ -1,36 +1,44 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
 // Kassiopeia Sternbild (W-Form, nach links gedreht = M-Form)
 // Ziel-Positionen für die 5 Sterne in M-Form (nach links gedrehtes W)
+// Positionen in Prozent (basierend auf 800x600 Design)
 const TARGET_POSITIONS = [
-  { x: 150, y: 300 },  // Links unten
-  { x: 250, y: 150 },  // Links oben
-  { x: 350, y: 250 },  // Mitte
-  { x: 450, y: 150 },  // Rechts oben
-  { x: 550, y: 300 },  // Rechts unten
+  { x: 18.75, y: 50 },    // Links unten (150/800, 300/600)
+  { x: 31.25, y: 25 },    // Links oben (250/800, 150/600)
+  { x: 43.75, y: 41.67 }, // Mitte (350/800, 250/600)
+  { x: 56.25, y: 25 },    // Rechts oben (450/800, 150/600)
+  { x: 68.75, y: 50 },    // Rechts unten (550/800, 300/600)
 ]
 
-const TOLERANCE = 60 // Pixel-Toleranz für "richtige" Position
+const TOLERANCE = 8 // Prozent-Toleranz für "richtige" Position
 
 function StarField({ onUnlock }) {
+  // Start-Positionen in Prozent (basierend auf 800x600 Design)
   const [stars, setStars] = useState([
-    { id: 1, x: 100, y: 100 },
-    { id: 2, x: 600, y: 150 },
-    { id: 3, x: 200, y: 450 },
-    { id: 4, x: 500, y: 400 },
-    { id: 5, x: 350, y: 500 },
+    { id: 1, x: 12.5, y: 16.67 },   // 100/800, 100/600
+    { id: 2, x: 75, y: 25 },        // 600/800, 150/600
+    { id: 3, x: 25, y: 75 },        // 200/800, 450/600
+    { id: 4, x: 62.5, y: 66.67 },   // 500/800, 400/600
+    { id: 5, x: 43.75, y: 83.33 },  // 350/800, 500/600
   ])
 
   const containerRef = useRef(null)
 
   const handleDrag = (id, event, info) => {
+    if (!containerRef.current) return
+
+    const containerRect = containerRef.current.getBoundingClientRect()
+    const deltaXPercent = (info.delta.x / containerRect.width) * 100
+    const deltaYPercent = (info.delta.y / containerRect.height) * 100
+
     const newStars = stars.map(star => {
       if (star.id === id) {
         return {
           ...star,
-          x: star.x + info.delta.x,
-          y: star.y + info.delta.y,
+          x: Math.max(0, Math.min(100, star.x + deltaXPercent)),
+          y: Math.max(0, Math.min(100, star.y + deltaYPercent)),
         }
       }
       return star
@@ -49,6 +57,7 @@ function StarField({ onUnlock }) {
 
     sortedStars.forEach((star, index) => {
       const target = TARGET_POSITIONS[index]
+      // Berechne Distanz in Prozent
       const distance = Math.sqrt(
         Math.pow(star.x - target.x, 2) + Math.pow(star.y - target.y, 2)
       )
@@ -86,8 +95,8 @@ function StarField({ onUnlock }) {
             key={`target-${i}`}
             style={{
               position: 'absolute',
-              left: pos.x,
-              top: pos.y,
+              left: `${pos.x}%`,
+              top: `${pos.y}%`,
               width: '6px',
               height: '6px',
               borderRadius: '50%',
@@ -106,8 +115,8 @@ function StarField({ onUnlock }) {
             dragMomentum={false}
             onDrag={(e, info) => handleDrag(star.id, e, info)}
             style={{
-              left: star.x,
-              top: star.y,
+              left: `${star.x}%`,
+              top: `${star.y}%`,
               transform: 'translate(-50%, -50%)',
               '--delay': `${index * 0.2}s`,
             }}
