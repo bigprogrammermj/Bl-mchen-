@@ -1,54 +1,107 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
-// Kassiopeia Sternbild (W-Form, nach links gedreht = M-Form)
-// Ziel-Positionen für die 5 Sterne in M-Form (nach links gedrehtes W)
+// Kassiopeia Sternbild als W-Form (um 180° gedreht von M)
+// Größere Werte für ein größeres Sternbild
 const TARGET_POSITIONS = [
-  { x: 150, y: 300 },  // Links unten
-  { x: 250, y: 150 },  // Links oben
-  { x: 350, y: 250 },  // Mitte
-  { x: 450, y: 150 },  // Rechts oben
-  { x: 550, y: 300 },  // Rechts unten
+  { x: 0.12, y: 0.35 },   // Links oben
+  { x: 0.28, y: 0.65 },   // Links unten
+  { x: 0.50, y: 0.40 },   // Mitte oben
+  { x: 0.72, y: 0.65 },   // Rechts unten
+  { x: 0.88, y: 0.35 },   // Rechts oben
 ]
 
-const TOLERANCE = 60 // Pixel-Toleranz für "richtige" Position
+const TOLERANCE = 50 // Pixel-Toleranz für "richtige" Position
 
 function StarField({ onUnlock }) {
+  const containerRef = useRef(null)
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 })
+
+  // Sterne mit relativen Startpositionen (werden später in Pixel umgerechnet)
   const [stars, setStars] = useState([
-    { id: 1, x: 100, y: 100 },
-    { id: 2, x: 600, y: 150 },
-    { id: 3, x: 200, y: 450 },
-    { id: 4, x: 500, y: 400 },
-    { id: 5, x: 350, y: 500 },
+    { id: 1, x: 0, y: 0 },
+    { id: 2, x: 0, y: 0 },
+    { id: 3, x: 0, y: 0 },
+    { id: 4, x: 0, y: 0 },
+    { id: 5, x: 0, y: 0 },
   ])
 
-  const containerRef = useRef(null)
+  const [initialized, setInitialized] = useState(false)
 
-  const handleDrag = (id, event, info) => {
+  // Container-Größe messen und Sterne initial positionieren
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect()
+        setContainerSize({ width: rect.width, height: rect.height })
+
+        if (!initialized && rect.width > 0) {
+          // Zufällige Startpositionen für die Sterne
+          setStars([
+            { id: 1, x: rect.width * 0.15, y: rect.height * 0.20 },
+            { id: 2, x: rect.width * 0.85, y: rect.height * 0.15 },
+            { id: 3, x: rect.width * 0.25, y: rect.height * 0.80 },
+            { id: 4, x: rect.width * 0.75, y: rect.height * 0.75 },
+            { id: 5, x: rect.width * 0.50, y: rect.height * 0.85 },
+          ])
+          setInitialized(true)
+        }
+      }
+    }
+
+    updateSize()
+    window.addEventListener('resize', updateSize)
+    return () => window.removeEventListener('resize', updateSize)
+  }, [initialized])
+
+  // Berechne absolute Zielpositionen basierend auf Container-Größe
+  const getAbsoluteTargets = () => {
+    return TARGET_POSITIONS.map(pos => ({
+      x: pos.x * containerSize.width,
+      y: pos.y * containerSize.height,
+    }))
+  }
+
+  const handleDragEnd = (id, event, info) => {
+    if (!containerRef.current) return
+
+    const rect = containerRef.current.getBoundingClientRect()
+
+    // Berechne die finale Position relativ zum Container
+    const pointerX = info.point.x - rect.left
+    const pointerY = info.point.y - rect.top
+
+    // Begrenzen auf Container
+    const clampedX = Math.max(15, Math.min(rect.width - 15, pointerX))
+    const clampedY = Math.max(15, Math.min(rect.height - 15, pointerY))
+
     const newStars = stars.map(star => {
       if (star.id === id) {
         return {
           ...star,
-          x: star.x + info.delta.x,
-          y: star.y + info.delta.y,
+          x: clampedX,
+          y: clampedY,
         }
       }
       return star
     })
-    setStars(newStars)
 
-    // Prüfe ob alle Sterne in der richtigen Kassiopeia-Formation sind
+    setStars(newStars)
     checkConstellation(newStars)
   }
 
   const checkConstellation = (currentStars) => {
+    const targets = getAbsoluteTargets()
+
     // Sortiere Sterne nach X-Position für konsistente Zuordnung
     const sortedStars = [...currentStars].sort((a, b) => a.x - b.x)
 
     let correctCount = 0
 
     sortedStars.forEach((star, index) => {
-      const target = TARGET_POSITIONS[index]
+      const target = targets[index]
+      if (!target) return
+
       const distance = Math.sqrt(
         Math.pow(star.x - target.x, 2) + Math.pow(star.y - target.y, 2)
       )
@@ -80,39 +133,41 @@ function StarField({ onUnlock }) {
       </p>
 
       <div className="constellation-area" ref={containerRef}>
-        {/* Ziel-Positionen als Hinweise (optional dezent) */}
-        {TARGET_POSITIONS.map((pos, i) => (
+        {/* Ziel-Positionen als dezente Hinweise */}
+        {initialized && TARGET_POSITIONS.map((pos, i) => (
           <div
             key={`target-${i}`}
+            className="target-hint"
             style={{
-              position: 'absolute',
-              left: pos.x,
-              top: pos.y,
-              width: '6px',
-              height: '6px',
-              borderRadius: '50%',
-              background: 'rgba(255, 216, 155, 0.2)',
-              transform: 'translate(-50%, -50%)',
+              left: `${pos.x * 100}%`,
+              top: `${pos.y * 100}%`,
             }}
           />
         ))}
 
         {/* Draggable Sterne */}
-        {stars.map((star, index) => (
+        {initialized && stars.map((star, index) => (
           <motion.div
             key={star.id}
             className="draggable-star"
             drag
             dragMomentum={false}
-            onDrag={(e, info) => handleDrag(star.id, e, info)}
+            dragElastic={0}
+            onDragEnd={(e, info) => handleDragEnd(star.id, e, info)}
+            initial={false}
+            animate={{
+              x: star.x,
+              y: star.y,
+            }}
+            transition={{ type: "tween", duration: 0 }}
             style={{
-              left: star.x,
-              top: star.y,
-              transform: 'translate(-50%, -50%)',
+              position: 'absolute',
+              left: 0,
+              top: 0,
               '--delay': `${index * 0.2}s`,
             }}
-            whileHover={{ scale: 1.2 }}
-            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.3 }}
+            whileTap={{ scale: 1.1 }}
           >
             <svg viewBox="0 0 51 48" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
