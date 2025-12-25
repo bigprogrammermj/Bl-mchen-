@@ -16,23 +16,41 @@
   box-sizing: border-box;
 }
 
+html {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
 body {
   font-family: 'Crimson Pro', serif;
   background: var(--night-deep);
   color: var(--star-bright);
-  overflow-x: hidden;
+  overflow: hidden;
   min-height: 100vh;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  -webkit-overflow-scrolling: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 #root {
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
+  position: fixed;
 }
 
 .app {
-  position: relative;
+  position: fixed;
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
   background:
     radial-gradient(ellipse at top, var(--night-mid) 0%, transparent 60%),
     radial-gradient(ellipse at bottom right, #1a0a2e 0%, transparent 50%),
@@ -66,17 +84,62 @@ body {
   50% { opacity: var(--opacity); transform: scale(1.5); }
 }
 
+/* Sternschnuppen */
+.shooting-stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.shooting-star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.8);
+  animation: shoot var(--shoot-duration) ease-out forwards;
+}
+
+.shooting-star::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 2px;
+  height: 2px;
+  width: 80px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.8), transparent);
+  transform: translateX(2px) translateY(0);
+  border-radius: 50%;
+}
+
+@keyframes shoot {
+  0% {
+    transform: translate(0, 0) rotate(-45deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(300px, 300px) rotate(-45deg);
+    opacity: 0;
+  }
+}
+
 /* Star Field Container */
 .star-field {
-  position: relative;
+  position: fixed;
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 1rem;
   z-index: 1;
+  overflow: hidden;
 }
 
 .star-field-title {
@@ -111,15 +174,16 @@ body {
 
 .constellation-area {
   position: relative;
-  width: min(800px, 90vw);
-  height: min(600px, 70vh);
-  border: 1px solid rgba(255, 216, 155, 0.2);
-  border-radius: 20px;
-  background: rgba(10, 14, 39, 0.3);
-  backdrop-filter: blur(10px);
-  box-shadow:
-    0 0 40px rgba(255, 216, 155, 0.1),
-    inset 0 0 60px rgba(255, 216, 155, 0.05);
+  width: 100vw;
+  height: 100vh;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+  overflow: hidden;
+  touch-action: none;
+  overscroll-behavior: contain;
 }
 
 .draggable-star {
@@ -128,6 +192,7 @@ body {
   z-index: 10;
   filter: drop-shadow(0 0 8px var(--star-gold));
   transition: filter 0.3s ease;
+  touch-action: none;
 }
 
 .draggable-star:hover {
@@ -139,10 +204,17 @@ body {
 }
 
 .draggable-star svg {
-  width: 40px;
-  height: 40px;
+  width: 80px;
+  height: 80px;
   animation: pulse 2s ease-in-out infinite;
   animation-delay: var(--delay);
+}
+
+@media (max-width: 768px) {
+  .draggable-star svg {
+    width: 70px;
+    height: 70px;
+  }
 }
 
 @keyframes pulse {
@@ -152,15 +224,21 @@ body {
 
 /* Gift Reveal */
 .gift-reveal {
-  position: relative;
+  position: fixed;
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 4rem 2rem;
+  padding: 2rem 1rem;
   z-index: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  overscroll-behavior-x: none;
+  touch-action: pan-y;
 }
 
 .gift-container {

@@ -6,8 +6,8 @@ import './App.css'
 
 function App() {
   const [unlocked, setUnlocked] = useState(false)
-  const [showSuccess, setShowSuccess] = useState(false)
   const [backgroundStars, setBackgroundStars] = useState([])
+  const [shootingStars, setShootingStars] = useState([])
 
   // Generiere funkelnde Hintergrund-Sterne
   useEffect(() => {
@@ -22,12 +22,34 @@ function App() {
     setBackgroundStars(stars)
   }, [])
 
+  // Generiere Sternschnuppen
+  useEffect(() => {
+    const createShootingStar = () => {
+      const id = Math.random()
+      const newStar = {
+        id,
+        top: `${Math.random() * 50}%`,
+        left: `${Math.random() * 100}%`,
+        duration: `${1.5 + Math.random() * 1}s`,
+      }
+      setShootingStars(prev => [...prev, newStar])
+
+      setTimeout(() => {
+        setShootingStars(prev => prev.filter(s => s.id !== id))
+      }, 3000)
+    }
+
+    const interval = setInterval(() => {
+      if (Math.random() > 0.7) {
+        createShootingStar()
+      }
+    }, 3000)
+
+    return () => clearInterval(interval)
+  }, [])
+
   const handleUnlock = () => {
-    setShowSuccess(true)
-    setTimeout(() => {
-      setShowSuccess(false)
-      setUnlocked(true)
-    }, 2000)
+    setUnlocked(true)
   }
 
   return (
@@ -49,19 +71,20 @@ function App() {
         ))}
       </div>
 
-      {/* Success Message beim Entsperren */}
-      <AnimatePresence>
-        {showSuccess && (
-          <motion.div
-            className="success-message"
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1.2 }}
-            exit={{ opacity: 0, scale: 1 }}
-          >
-            ✨ Die Sterne haben sich ausgerichtet ✨
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Sternschnuppen */}
+      <div className="shooting-stars">
+        {shootingStars.map(star => (
+          <div
+            key={star.id}
+            className="shooting-star"
+            style={{
+              left: star.left,
+              top: star.top,
+              '--shoot-duration': star.duration,
+            }}
+          />
+        ))}
+      </div>
 
       {/* Haupt-Content */}
       <AnimatePresence mode="wait">
