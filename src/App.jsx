@@ -6,7 +6,6 @@ import './App.css'
 
 function App() {
   const [unlocked, setUnlocked] = useState(false)
-  const [showSuccess, setShowSuccess] = useState(false)
   const [backgroundStars, setBackgroundStars] = useState([])
 
   // Generiere funkelnde Hintergrund-Sterne
@@ -23,11 +22,7 @@ function App() {
   }, [])
 
   const handleUnlock = () => {
-    setShowSuccess(true)
-    setTimeout(() => {
-      setShowSuccess(false)
-      setUnlocked(true)
-    }, 2000)
+    setUnlocked(true)
   }
 
   return (
@@ -48,20 +43,6 @@ function App() {
           />
         ))}
       </div>
-
-      {/* Success Message beim Entsperren */}
-      <AnimatePresence>
-        {showSuccess && (
-          <motion.div
-            className="success-message"
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1.2 }}
-            exit={{ opacity: 0, scale: 1 }}
-          >
-            ✨ Die Sterne haben sich ausgerichtet ✨
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Haupt-Content */}
       <AnimatePresence mode="wait">

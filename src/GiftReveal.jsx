@@ -107,8 +107,8 @@ function GiftReveal() {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                minHeight: '60vh',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                paddingTop: '15vh'
               }}
             >
               <motion.h1
@@ -165,13 +165,6 @@ function GiftReveal() {
                 </div>
               </motion.div>
 
-              <motion.div className="love-message" variants={itemVariants}>
-                Ich liebe dich über alle Sterne hinaus. Du bist mein Universum,
-                mein Kassiopeia am Nachthimmel, mein schönster Traum der wahr wurde.
-                <br /><br />
-                Für immer dein
-              </motion.div>
-
               {/* Video Section */}
               <motion.div className="video-section" variants={itemVariants}>
                 <p className="video-title">und das wird dort auch passieren:</p>
@@ -185,48 +178,48 @@ function GiftReveal() {
                   />
                 </div>
               </motion.div>
-
-              {/* Footer mit Links */}
-              <motion.div className="footer" variants={itemVariants}>
-                <h2 className="footer-title">Rechtliches</h2>
-
-                <div className="footer-links">
-                  {Object.entries(footerSections).map(([key, section]) => (
-                    <button
-                      key={key}
-                      className={`footer-link ${activeSection === key ? 'active' : ''}`}
-                      onClick={() => setActiveSection(activeSection === key ? null : key)}
-                    >
-                      {section.title}
-                    </button>
-                  ))}
-                </div>
-
-                <AnimatePresence mode="wait">
-                  {activeSection && (
-                    <motion.div
-                      key={activeSection}
-                      className="footer-detail"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <h3>{footerSections[activeSection].title}</h3>
-                      <p style={{ whiteSpace: 'pre-line' }}>
-                        {footerSections[activeSection].content}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <p style={{ marginTop: '1.5rem', fontSize: '0.85rem', opacity: 0.7 }}>
-                  © {new Date().getFullYear()} · Powered by Love
-                </p>
-              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Footer ist immer sichtbar */}
+        <div className="footer">
+          <h2 className="footer-title">Rechtliches</h2>
+
+          <div className="footer-links">
+            {Object.entries(footerSections).map(([key, section]) => (
+              <button
+                key={key}
+                className={`footer-link ${activeSection === key ? 'active' : ''}`}
+                onClick={() => setActiveSection(activeSection === key ? null : key)}
+              >
+                {section.title}
+              </button>
+            ))}
+          </div>
+
+          <AnimatePresence mode="wait">
+            {activeSection && (
+              <motion.div
+                key={activeSection}
+                className="footer-detail"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <h3>{footerSections[activeSection].title}</h3>
+                <p style={{ whiteSpace: 'pre-line' }}>
+                  {footerSections[activeSection].content}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <p style={{ marginTop: '1.5rem', fontSize: '0.85rem', opacity: 0.7 }}>
+            © {new Date().getFullYear()} · Powered by Love
+          </p>
+        </div>
       </div>
     </motion.div>
   )
